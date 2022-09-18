@@ -105,7 +105,6 @@
       enabled: yes
       state: restarted
   - name: Copy join command to local file
-    delegate_to: localhost
     ansible.builtin.copy:
       src: ./join_command
       dest: /tmp/join-command.sh

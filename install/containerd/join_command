@@ -1,0 +1,1 @@
+kubeadm join 192.168.56.100:6443 --token br7chc.gzqczh9jwj7m552z --discovery-token-ca-cert-hash sha256:1c875d4c80116a74c7186f4963030d8423d63861c990bd0d0bc323ec4fc1e53b 

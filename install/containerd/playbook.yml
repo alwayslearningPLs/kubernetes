@@ -105,27 +105,32 @@
       enabled: yes
       state: restarted
   - name: Init kubeadm
-    ansible.builtin.command: kubeadm init --apiserver-advertise-address "{{ ip_address }}" --pod-network-cidr=192.168.0.0/16
+    ansible.builtin.command: kubeadm init --apiserver-cert-extra-sans "{{ ip_address }}" --apiserver-advertise-address "{{ ip_address }}" --pod-network-cidr=192.168.0.0/16 --node-name admin
   - name: Setup kubeconfig to the local user
     ansible.builtin.command: "{{ item }}"
     loop:
     - mkdir -p /home/vagrant/.kube
     - cp -i /etc/kubernetes/admin.conf /home/vagrant/.kube/config
     - chown vagrant:vagrant /home/vagrant/.kube/config
+  - name: Setup kubeconfig to the root user
+    ansible.builtin.command: "{{ item }}"
+    loop:
+    - mkdir -p /root/.kube
+    - cp -i /etc/kubernetes/admin.conf /root/.kube/config
+    - chown root:root /root/.kube/config
   - name: Waiting for kubernetes plan control to be ready
     ansible.builtin.wait_for:
       port: 6443
       delay: 10
   - name: Install calico
-    become_user: vagrant
     ansible.builtin.command: kubectl create -f https://docs.projectcalico.org/manifests/calico.yaml
   - name: Generate the kubernetes join command
     ansible.builtin.command: kubeadm token create --print-join-command
     register: join_command
   - name: Copy join command to local file
+    become: no
     delegate_to: localhost
     ansible.builtin.copy:
-      become: false
       content: "{{ join_command.stdout_lines[0] }}"
       dest: ./join_command
 
